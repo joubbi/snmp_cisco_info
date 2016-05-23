@@ -5,7 +5,7 @@ tags: Snmp
 vendor: Cisco
 target: Inventory
 type: Plugin
-license: Apache v2
+license: Apache License 2.0
 releases:
   -
     name: 2.0
