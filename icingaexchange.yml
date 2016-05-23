@@ -1,0 +1,18 @@
+name: snmp_cisco_info
+description: "file:///README.md"
+url: "https://gitlab.com/faridj/snmp_cisco_info.git"
+tags: Snmp
+vendor: Cisco
+target: Inventory
+type: Plugin
+license: Apache v2
+releases:
+  -
+    name: 2.0
+    description: "2.0 Release"
+    files:
+      -
+        name: snmp_cisco_info
+        url: "file:///snmp_cisco_info.sh"
+        description: "snmp_cisco_info 2.0"
+        checksum: 58daac7c85b81094667712d2e360a62d
