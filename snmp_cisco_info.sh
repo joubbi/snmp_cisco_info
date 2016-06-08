@@ -16,16 +16,17 @@
 #                                                                                      #
 #                                                                                      #
 # USAGE:                                                                               #
-# Add this script as a service check in Op5/Nagios for a Cisco device.                 #
+# Add this script as a service check in Op5/Nagios/Icinga... for a Cisco device.       #
 # Apply the SNMP authentication information as variables to the service.               #
 # The check will always return OK, even if the host is down.                           #
 #                                                                                      #
 # Tested with: 6500, ASR and other routers, different Catalyst, Nexus...               #  
 #                                                                                      #
 #  Version history:                                                                    #
-# 2.0 2015-10-27  Cleanups, more error handling and support for C3850                  #
+# 2.1 2016-06-08  Replaced the OID for Nexus model.                                    #
+# 2.0 2015-10-27  Cleanups, more error handling and support for C3850.                 #
 # 1.0 2015-08-19  Initial public release with some added comments and a new name.      #
-#     2015-06-08  Added support for stacks bigger than 4		               #
+#     2015-06-08  Added support for stacks bigger than 4.		               #
 #     2015-05-22  Added support for some old ASR version.                              #
 #     2014-11-07  Updated the logic for model 4500.                                    #
 #     2014-11-05  Added Cisco 4500 VSS logic to get serial of switch2.                 #
@@ -134,7 +135,7 @@ fi
 # Cisco Nexus
 echo "$model" | /bin/grep 'exists' > /dev/null
 if [ $? == 0 ]; then
-  model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.2.149 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.13.10 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
 fi
 
 # Some old Cisco ASR IOS
@@ -162,10 +163,8 @@ if [ $? == 0 ]; then
 fi
 
 # Cisco 6500
-echo "$model" | /bin/grep 'Chassis' | /bin/grep -Ev 'Nexus|C3850|ASR' > /dev/null
+echo "$model" | /bin/grep 'Chassis' | /bin/grep -Ev 'C3850|ASR' > /dev/null
 if [ $? == 0 ]; then
-  #model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.13.2 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-  #model="C6500"
   model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.7.1000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
   serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
   echo "$model" | /bin/grep -v 'WS' > /dev/null

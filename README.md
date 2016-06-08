@@ -1,12 +1,18 @@
 # snmp_cisco_info
 
-A script for presenting information about Cisco devices using SNMP.
+A script that presents information about Cisco devices using SNMP.
+Suitable to use as a plugin for any Nagios compatible monitoring system.
 
 The script utputs a string with:
 >hostname,<br> model,<br> IOS version,<br> serial nr.,<br> location, <br> contact"
 
-(The formatting of this string can easily be modified at the bottom of this script).
+All the fields are queried by SNMP from the device.
+The location field is whatever is configured with "snmp-server location" in running-config on the device.
+The contact field is whatever is configured with "snmp-server contact".
+
+The formatting of this string can easily be modified at the bottom of this script.
 The string can then be used by some external system or just as information as is.
+It is for example possible to query the API in Op5 Monitor for the information gathered by this plugin. 
 Logical devices in a stack or cluster configuration will output one row of
 information per physical device.
 

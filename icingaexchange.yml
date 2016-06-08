@@ -8,11 +8,11 @@ type: Plugin
 license: Apache License 2.0
 releases:
   -
-    name: 2.0
-    description: "2.0 Release"
+    name: 2.1
+    description: "2.1 Release"
     files:
       -
         name: snmp_cisco_info
         url: "file:///snmp_cisco_info.sh"
         description: "snmp_cisco_info 2.0"
-        checksum: 58daac7c85b81094667712d2e360a62d
+        checksum: 24cf55878cb00f291d8624e4952161f3 
