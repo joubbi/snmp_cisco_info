@@ -12,7 +12,7 @@ releases:
     description: "2.1 Release"
     files:
       -
-        name: snmp_cisco_info
+        name: snmp_cisco_info.sh
         url: "file:///snmp_cisco_info.sh"
-        description: "snmp_cisco_info 2.1"
+        description: "snmp_cisco_info.sh 2.1"
         checksum: 24cf55878cb00f291d8624e4952161f3 
