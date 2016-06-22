@@ -10,7 +10,7 @@ All the fields are queried by SNMP from the device.
 The location field is whatever is configured with "snmp-server location" in running-config on the device.
 The contact field is whatever is configured with "snmp-server contact".
 
-The formatting of this string can easily be modified at the bottom of this script.
+The formatting of this string can easily be modified at the top of this script.
 The string can then be used by some external system or just as information as is.
 It is for example possible to query the API in Op5 Monitor for the information gathered by this plugin. 
 Logical devices in a stack or cluster configuration will output one row of
