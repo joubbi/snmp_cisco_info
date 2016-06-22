@@ -6,7 +6,7 @@
 #                                                                                      #
 # The script utputs a string with:                                                     #
 # hostname,<br> model,<br> IOS version,<br> serial nr.,<br> location, <br> contact"    #
-# (The formatting of this string can easily be modified at the bottom of this script). #
+# (The formatting of this string can easily be modified at the top of this script).    #
 # The string can then be used by some external system or just as information as is.    #
 # Logical devices in a stack or cluster configuration will output one row of           #
 # information per physical device.                                                     #
@@ -23,6 +23,7 @@
 # Tested with: 6500, ASR and other routers, different Catalyst, Nexus...               #  
 #                                                                                      #
 #  Version history:                                                                    #
+# 3.0 2016-06-21  Major cleaning since the script had grown + support for C6807-XL     # 
 # 2.1 2016-06-08  Replaced the OID for Nexus model.                                    #
 # 2.0 2015-10-27  Cleanups, more error handling and support for C3850.                 #
 # 1.0 2015-08-19  Initial public release with some added comments and a new name.      #
@@ -38,9 +39,64 @@
 #                                                                                      #
 ########################################################################################
 
+
+print_and_exit (){
+# This is a function that prints the string with the gathered values after some sanity checks
+
+  # OID does not exist
+  echo "$hostname" | /bin/grep -E 'exists|available' > /dev/null
+  if [ $? == 0 ]; then
+    hostname="N/A"
+  fi
+  echo "$model" | /bin/grep -E 'exists|available' > /dev/null
+  if [ $? == 0 ]; then
+    model="N/A"
+  fi
+  echo "$version" | /bin/grep -E 'exists|available' > /dev/null
+  if [ $? == 0 ]; then
+    version="N/A"
+  fi
+  echo "$serial" | /bin/grep -E 'exists|available' > /dev/null
+  if [ $? == 0 ]; then
+    serial="N/A"
+  fi
+  echo "$location" | /bin/grep -E 'exists|available' > /dev/null
+  if [ $? == 0 ]; then
+    location="N/A"
+  fi
+  echo "$contact" | /bin/grep -E 'exists|available' > /dev/null
+  if [ $? == 0 ]; then
+    contact="N/A"
+  fi
+
+  # Check for empty variables
+  if [ -z "$hostname" ]; then
+    hostname="N/A"
+  fi
+  if [ -z "$model" ]; then
+    model="N/A"
+  fi
+  if [ -z "$version" ]; then
+    version="N/A"
+  fi
+  if [ -z "$serial" ]; then
+    serial="N/A"
+  fi
+  if [ -z "$location" ]; then
+    location="N/A"
+  fi
+  if [ -z "$contact" ]; then
+    contact="N/A"
+  fi
+
+  # Edit this line if you want the output in some other order or format
+  echo ""$hostname",<br> "$model",<br> "$version",<br> "$serial",<br> "$location",<br> "$contact""
+  exit 0
+}
+
+
 # Make sure that this points to snmpget
 SNMPGET="/usr/bin/snmpget"
-
 
 if [ $# == 6 ]; then
   SNMPOPT="-v 3 -l authPriv -u $2 -a $3 -A $4 -x $5 -X $6 $1 -Ov -t 0.5 -Lo"
@@ -69,8 +125,7 @@ if [ $? != 0 ]; then
   serial="N/A"
   location="N/A"
   contact="N/A"
-  echo ""$hostname",<br> "$model",<br> "$version",<br> "$serial",<br> "$location",<br> "$contact""
-  exit 0
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"  
 fi
 
 hostname=`echo "$hostname" | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
@@ -83,17 +138,36 @@ if [ $? == 0 ]; then
   serial="N/A"
   location="N/A"
   contact="N/A"
-  echo ""$hostname",<br> "$model",<br> "$version",<br> "$serial",<br> "$location",<br> "$contact""
-  exit 0  
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
+fi
+
+# Location and contact should be the same for all devices
+location=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.1.6.0 | /bin/sed -e 's/\STRING: //g' | tr '[<>]' '_'`
+contact=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.1.4.0 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+
+# This work for many Cisco switches
+model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.2.1001 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+
+# 6807
+echo "$model" | /bin/grep '6807' > /dev/null
+if [ $? == 0 ]; then
+  model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.13.1000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  version=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.10.3000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[,]' '_'`
+  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  serial2=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.2000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  echo "$serial2" | /bin/grep -v 'exists' > /dev/null
+  if [ $? == 0 ]; then
+    model2=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.13.2000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_i'`
+    serial=`printf "%s, %s" "$serial" "$serial2"`
+    model=`printf "%s, %s" "$model" "$model2"`
+    version=`printf "%s, %s" "$version" "$version"`
+  fi
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
 fi
 
 # These work for many Cisco switches
-#hostname=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.1.5.0 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.2.1001 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
 version=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.10.1001 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
 serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1001 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-location=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.1.6.0 | /bin/sed -e 's/\STRING: //g' | tr '[<>]' '_'`
-contact=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.1.4.0 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
 
 # Cisco routers
 echo "$version" | /bin/grep 'exists' > /dev/null
@@ -117,7 +191,7 @@ if [ -z "$version" ]; then
   version=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.10.10000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[,]' '_'`
 fi
 
-# Cisco 4500 new IOS
+# Cisco 4500 new IOS and C6807-XL
 echo "$version" | /bin/grep 'exists' > /dev/null
 if [ $? == 0 ]; then
   version=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.10.3000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[,]' '_'`
@@ -147,6 +221,21 @@ fi
 
 #################### serial ############################
 
+# Cisco routers
+echo "$serial" | /bin/grep 'exists' > /dev/null
+if [ $? == 0 ]; then
+  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+fi
+
+# Cisco Nexus
+echo "$serial" | /bin/grep 'exists' > /dev/null
+if [ $? == 0 ]; then
+  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.10 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+fi
+
+
+#################### Specific cases ############################
+
 # Cisco 4500 VSS
 $SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.2.2 | /bin/grep 'WS-C45' > /dev/null
 if [ $? == 0 ]; then
@@ -159,7 +248,19 @@ if [ $? == 0 ]; then
     serial=`printf "%s, %s" "$serial" "$serial2"`
     model=`printf "%s, %s" "$model" "$model2"`
     version=`printf "%s, %s" "$version" "$version"` 
-  fi 
+  fi
+
+  # Cisco 4500 older versions
+  if [ -z "$serial" ]; then
+    serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  fi
+
+  # Cisco 4500 new IOS
+  if [ -z "$serial" ]; then
+    serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.2 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  fi
+
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
 fi
 
 # Cisco 6500
@@ -202,8 +303,8 @@ if [ $? == 0 ]; then
   model=`printf "%s, %s" "$model" "$model2"`
   serial=`printf "%s, %s" "$serial" "$serial2"`
   version=`printf "%s, %s" "$version" "$version"`
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
 fi
-
 
 # Cisco C3850
 echo "$model" | /bin/grep -E 'C3850' > /dev/null
@@ -237,8 +338,8 @@ if [ $? == 0 ]; then
       fi
     fi
   fi
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
 fi
-
 
 # Cisco C2960S, C2960X and C3750 stack members
 echo "$model" | /bin/grep -E 'C2960S|C2960X|C3750' > /dev/null
@@ -306,85 +407,9 @@ if [ $? == 0 ]; then
       fi
     fi
   fi
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
 fi
 
 
-# Cisco routers
-echo "$serial" | /bin/grep 'exists' > /dev/null
-if [ $? == 0 ]; then
-  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-fi
+print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
 
-# Cisco Nexus 
-echo "$serial" | /bin/grep 'exists' > /dev/null
-if [ $? == 0 ]; then
-  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.10 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-fi
-
-# Cisco 4500
-if [ -z "$serial" ]; then
-  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-fi
-
-# Cisco 4500 new IOS
-if [ -z "$serial" ]; then
-  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.2 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-fi
-
-
-############### OID does not exist #############
-
-echo "$hostname" | /bin/grep -E 'exists|available' > /dev/null
-if [ $? == 0 ]; then
-  hostname="N/A"
-fi
-
-echo "$model" | /bin/grep -E 'exists|available' > /dev/null
-if [ $? == 0 ]; then
-  model="N/A"
-fi
-
-echo "$version" | /bin/grep -E 'exists|available' > /dev/null
-if [ $? == 0 ]; then
-  version="N/A"
-fi
-
-echo "$serial" | /bin/grep -E 'exists|available' > /dev/null
-if [ $? == 0 ]; then
-  serial="N/A"
-fi
-
-echo "$location" | /bin/grep -E 'exists|available' > /dev/null
-if [ $? == 0 ]; then
-  location="N/A"
-fi
-
-echo "$contact" | /bin/grep -E 'exists|available' > /dev/null
-if [ $? == 0 ]; then
-  contact="N/A"
-fi
-
-
-# Check for empty variables
-if [ -z "$hostname" ]; then
-  hostname="N/A"
-fi
-if [ -z "$model" ]; then
-  model="N/A"
-fi
-if [ -z "$version" ]; then
-  version="N/A"
-fi
-if [ -z "$serial" ]; then
-  serial="N/A"
-fi
-if [ -z "$location" ]; then
-  location="N/A"
-fi
-if [ -z "$contact" ]; then
-  contact="N/A"
-fi
-
-
-echo ""$hostname",<br> "$model",<br> "$version",<br> "$serial",<br> "$location",<br> "$contact""
-exit 0

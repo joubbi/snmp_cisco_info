@@ -1,18 +1,18 @@
 name: snmp_cisco_info
 description: "file:///README.md"
 url: "https://gitlab.com/faridj/snmp_cisco_info.git"
-tags: Snmp
+tags: Snmp, Hardware, Switch, Router
 vendor: Cisco
 target: Inventory
 type: Plugin
 license: Apache License 2.0
 releases:
   -
-    name: 2.1
-    description: "2.1 Release"
+    name: 3.0
+    description: "3.0 Release"
     files:
       -
         name: snmp_cisco_info
         url: "file:///snmp_cisco_info.sh"
-        description: "snmp_cisco_info 2.0"
-        checksum: 24cf55878cb00f291d8624e4952161f3 
+        description: "snmp_cisco_info 3.0"
+        checksum: cd6c9b03e840bf7a945c7d0844201fd2 
