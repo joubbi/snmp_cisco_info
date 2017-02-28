@@ -14,7 +14,7 @@ The location field is whatever is configured with "snmp-server location" in runn
 The contact field is whatever is configured with "snmp-server contact".
 
 
-The formatting of this string can easily be modified at the top of this script.
+The formatting of the output string can easily be modified at the top of the script.
 The string can then be used by some external system or just as information as is.
 It is for example possible to query the API in Op5 Monitor for the information gathered by this plugin. 
 Logical devices in a stack or cluster configuration will output one row of
@@ -30,9 +30,6 @@ Add this script as a service check in Op5/Nagios for a Cisco device.
 Apply the SNMP authentication information as variables to the service.
 
 The check will always return OK, even if the host is down.
-
-
-Tested with: 6500, ASR and other routers, different Catalyst, Nexus...
 
 
 ## Version history
