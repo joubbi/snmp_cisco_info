@@ -11,8 +11,8 @@
 # Logical devices in a stack or cluster configuration will output one row of           #
 # information per physical device.                                                     #
 #                                                                                      #
-# This script was wtitten for Op5 in order to populate a database for device inventory #
-# consisting of more than 2000 Cisco network devices.                                  #
+# This script was wtitten for Op5 Monitor in order to populate a database for          #
+# device inventory consisting of more than 2000 Cisco network devices.                 #
 #                                                                                      #
 #                                                                                      #
 # USAGE:                                                                               #
@@ -36,7 +36,8 @@
 #     2014-10-14  Added section for Cisco WS-6500, and handling of SNMP error.         #
 #     2014-04-16  First version.                                                       #
 #                                                                                      #
-# Written by Farid.Joubbi@consign.se                                                   #
+# Licensed under the Apache License Version 2.0                                        #
+# Written by farid@joubbi.se                                                           #
 #                                                                                      #
 ########################################################################################
 

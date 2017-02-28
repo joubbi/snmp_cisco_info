@@ -15,4 +15,4 @@ releases:
         name: snmp_cisco_info
         url: "file:///snmp_cisco_info.sh"
         description: "snmp_cisco_info 3.1"
-        checksum: ed28d807c988af8f20b9e6fdaf97b39b
+        checksum: 567cbcb71de45815337b94e37fbfe6cc 
