@@ -13,6 +13,6 @@ releases:
     files:
       -
         name: snmp_cisco_info
-        url: "file:///snmp_cisco_info.sh"
+        url: "https://gitlab.com/faridj/snmp_general_info/raw/master/snmp_general_info.sh"
         description: "snmp_cisco_info 3.1"
         checksum: 567cbcb71de45815337b94e37fbfe6cc 

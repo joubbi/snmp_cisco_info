@@ -24,6 +24,10 @@ This script was wtitten for OP5 Monitor in order to populate a database for devi
 consisting of more than 2000 Cisco network devices.
 It has been tested with with: 6500, ASR and other routers, different Catalyst, Nexus...
 
+
+See also [snmp_genera_info](https://gitlab.com/faridj/snmp_general_info).
+
+
 ### USAGE
 Add this script as a service check in Op5/Nagios for a Cisco device.
 
