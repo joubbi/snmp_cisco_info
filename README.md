@@ -37,8 +37,9 @@ The check will always return OK, even if the host is down.
 
 
 ## Version history
-* 3.1 2016-08-26  Added support for WS-C3850-24XS-S
-* 3.0 2016-06-21  Major cleaning since the script had grown + support for C6807-XL 
+* 3.2 2019-04-24  Added dupport for C9500-48Y4C.
+* 3.1 2016-08-26  Added support for WS-C3850-24XS-S.
+* 3.0 2016-06-21  Major cleaning since the script had grown + support for C6807-XL.
 * 2.1 2016-06-08  Replaced the OID for Nexus model.
 * 2.0 2015-10-27  Cleanups, more error handling and support for C3850.
 * 1.0 2015-08-19  Initial public release with some added comments and a new name.

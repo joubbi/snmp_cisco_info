@@ -23,8 +23,9 @@
 # Tested with: 6500, ASR and other routers, different Catalyst, Nexus...               #  
 #                                                                                      #
 #  Version history:                                                                    #
-# 3.1 2016-08-26  Added support for WS-C3850-24XS-S                                    #
-# 3.0 2016-06-21  Major cleaning since the script had grown + support for C6807-XL     # 
+# 3.2 2019-04-24  Added dupport for C9500-48Y4C.                                       #
+# 3.1 2016-08-26  Added support for WS-C3850-24XS-S.                                   #
+# 3.0 2016-06-21  Major cleaning since the script had grown + support for C6807-XL.    # 
 # 2.1 2016-06-08  Replaced the OID for Nexus model.                                    #
 # 2.0 2015-10-27  Cleanups, more error handling and support for C3850.                 #
 # 1.0 2015-08-19  Initial public release with some added comments and a new name.      #
@@ -147,8 +148,17 @@ fi
 location=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.1.6.0 | /bin/sed -e 's/\STRING: //g' | tr '[<>]' '_'`
 contact=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.1.4.0 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
 
-# This work for many Cisco switches
+# This works for many Cisco switches
 model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.2.1001 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+
+# 9500. Maybe there is a better way to do this in the future looking at the version instead
+echo "$model" | /bin/grep 'PSOC' > /dev/null
+if [ $? == 0 ]; then
+  model=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.13.1000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  version=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.10.1000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[,]' '_'`
+  serial=`$SNMPGET $SNMPOPT .1.3.6.1.2.1.47.1.1.1.1.11.1000 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+  print_and_exit "$hostname" "$model" "$version" "$serial" "$location" "$contact"
+fi
 
 # 6807
 echo "$model" | /bin/grep '6807' > /dev/null
