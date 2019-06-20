@@ -93,7 +93,7 @@ print_and_exit (){
   fi
 
   # Edit this line if you want the output in some other order or format
-  echo ""$hostname",<br> "$model",<br> "$version",<br> "$serial",<br> "$location",<br> "$contact""
+  echo "$hostname,<br> $model,<br> $version,<br> $serial,<br> $location,<br> $contact"
   exit 0
 }
 
